@@ -36,7 +36,7 @@ void* produce(void* arg) {
 void* consume(void* arg) {
     for (int i = 0; i < 100000; i++) {
         pthread_mutex_lock(&mutex);
-	      sum--;
+	sum--;
 	pthread_mutex_unlock(&mutex);
     }
 }

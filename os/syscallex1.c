@@ -6,7 +6,7 @@ int main() {
     ssize_t bytesRead;
 
     // source.txt 읽기 전용으로 열기
-    int src_fd = open("source.txt", O_RDONLY);
+    int src_fd = open("source.txt", O_RDONLY | O_CREAT);
 
     // destination.txt 쓰기 전용으로 열기, 없으면 생성, 퍼미션 0644로 설정
     int dest_fd = open("destination.txt", O_WRONLY | O_CREAT, 0644);

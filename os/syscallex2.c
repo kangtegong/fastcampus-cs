@@ -11,10 +11,10 @@ int main() {
         return 1;
     } else if (pid == 0) {
         // 자식 프로세스  
-        printf("자식 프로세스입니다.\n");
+        printf("자식 프로세스\n");
     } else {
         // 부모 프로세스  
-        printf("부모 프로세스입니다. 자식 프로세스 ID: %d\n", pid);
+        printf("부모 프로세스\n");
     }
 
     return 0;
