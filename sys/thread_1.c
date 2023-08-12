@@ -9,7 +9,7 @@ void *thread_function(void *arg) {
 }
 
 int main() {
-    pthread_t thread_ids[5];  // 스레드 식별자 배열
+    pthread_t thread_ids[5];  // 스레드 ID 배열
     int thread_args[5];       // 스레드 인자 배열
 
     for (int i = 0; i < 5; i++) {
