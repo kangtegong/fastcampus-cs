@@ -1,59 +1,36 @@
-/**
-source: https://github.com/bluekds/SystemProgramming/blob/main/Lecture9/mmap/mmap.c
-**/
-#include <sys/mman.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-#define CHECK_MMAP_SUCCESS(_addr) \
-    if (_addr == MAP_FAILED)      \
-    {                             \
-        perror("mmap");           \
-        exit(1);                  \
+int main() {
+    size_t size = getpagesize();  // 페이지 크기 가져오기
+
+    int *shared_data = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    if (shared_data == MAP_FAILED) {
+        perror("mmap");
+        return 1;
     }
-#define printAddrs(msg)              \
-    {                                \
-        printf("%s\n", msg);         \
-        printf("addr1 = %s", addr1); \
-        printf("addr2 = %s", addr2); \
+
+    *shared_data = 42;  // 공유 데이터에 값 설정
+
+    pid_t pid = fork();
+    if (pid < 0) {
+        perror("fork");
+        return 1;
+    } else if (pid == 0) {
+        // 자식 프로세스
+        printf("Child process: shared_data = %d (Address: %p)\n", *shared_data, shared_data);
+        *shared_data = 84;  // 공유 데이터 변경
+        printf("Child process: shared_data changed to %d (Address: %p)\n", *shared_data, shared_data);
+    } else {
+        // 부모 프로세스
+        wait(NULL);  // 자식 프로세스가 종료될 때까지 대기
+        printf("Parent process: shared_data = %d (Address: %p)\n", *shared_data, shared_data);
     }
 
-int main(int argc, char *argv[])
-{
-    int fd;
-    caddr_t addr1, addr2;
-    char fileName[255] = "input.dat";
-
-    if (argc > 1)
-        strcpy(fileName, argv[1]);
-
-    if ((fd = open(fileName, O_RDWR)) == -1)
-    {
-        perror("open");
-        exit(1);
-    }
-    int pageSize = getpagesize();
-
-    addr1 = mmap(NULL, pageSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, (off_t)0);
-    CHECK_MMAP_SUCCESS(addr1);
-
-    addr2 = mmap(NULL, pageSize, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, (off_t)0);
-    CHECK_MMAP_SUCCESS(addr2);
-
-    close(fd);
-    printf("%s", addr1);
-
-    addr1[0] = '1';
-    printAddrs("After addr1[0]=1");
-    addr2[0] = '2';
-    printAddrs("After addr2[0]=2"); // CoW
-    addr1[0] = '3';
-    printAddrs("After addr1[0]=3");
-
-    execlp("cat", "cat", fileName, NULL);
-
+    munmap(shared_data, size);
     return 0;
 }
