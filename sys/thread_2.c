@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <pthread.h>
+#include <unistd.h>
 
 void *thread_function(void *arg) {
     int thread_id = *((int *)arg);
